@@ -7,13 +7,15 @@ import plotly.express as px
 
 # Initialize the Dash app
 app = dash.Dash(__name__)
+server = app.server  # Expose Flask server for Vercel
 
-# Load the dataset
-df = pd.read_csv('data/data.csv')
+# Load the dataset from GitHub
+DATA_URL = 'https://raw.githubusercontent.com/CarenRotich/COVID-19-Analytic-dashboard/refs/heads/master/data/data.csv'
+df = pd.read_csv(DATA_URL)
 
 # Data cleaning
 df['date'] = pd.to_datetime(df['date'])  # Convert date column to datetime
-df = df.fillna(0)  # Fill missing values with 0 for simplicity
+df = df.fillna(0)  # Fill missing values with 0
 countries = df['location'].unique()  # Get unique countries for dropdown
 
 # Define the layout of the app
@@ -21,16 +23,16 @@ app.layout = html.Div([
     html.H1("COVID-19 Dashboard", style={'textAlign': 'center', 'color': '#003087'}),
     
     # Dropdown for country selection
-    html.Label("Select Country:"),
+    html.Label("Select Country:", style={'fontSize': 18, 'margin': '10px'}),
     dcc.Dropdown(
         id='country-dropdown',
         options=[{'label': country, 'value': country} for country in countries],
-        value='United States',  # Default value
+        value='United States',
         style={'width': '50%', 'margin': '10px auto'}
     ),
     
     # Date range slider
-    html.Label("Select Date Range:"),
+    html.Label("Select Date Range:", style={'fontSize': 18, 'margin': '10px'}),
     dcc.DatePickerRange(
         id='date-picker',
         min_date_allowed=df['date'].min(),
@@ -42,14 +44,14 @@ app.layout = html.Div([
     ),
     
     # Line chart for cases and deaths
-    dcc.Graph(id='line-chart'),
+    dcc.Graph(id='line-chart', style={'margin': '20px'}),
     
     # Bar chart for total cases by continent
-    dcc.Graph(id='bar-chart'),
+    dcc.Graph(id='bar-chart', style={'margin': '20px'}),
     
     # Map for global cases
-    dcc.Graph(id='map-chart')
-])
+    dcc.Graph(id='map-chart', style={'margin': '20px'})
+], style={'backgroundColor': '#f8f9fa', 'padding': '20px'})
 
 # Define callback to update charts based on user input
 @app.callback(
@@ -99,6 +101,6 @@ def update_charts(selected_country, start_date, end_date):
     
     return line_fig, bar_fig, map_fig
 
-# Run the app
+# Run the app (for local testing)
 if __name__ == '__main__':
     app.run(debug=True)
